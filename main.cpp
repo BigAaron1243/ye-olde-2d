@@ -76,11 +76,14 @@ int main()
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     std::vector<Circle> circle_list;
     Circle ball;
-    ball.set_values(5,70,100,1,300, true);
+    ball.set_values(5,53,100,1,300, true);
     circle_list.push_back(ball);
     Circle ball_1;
-    ball_1.set_values(20,50,30,1,300, false);
+    ball_1.set_values(8,50,30,1,300, false);
     circle_list.push_back(ball_1);
+    Circle ball_2;
+    ball_2.set_values(8,80,30,1,300, false);
+    circle_list.push_back(ball_2);
     int canvas[100][100] = {0};
     while (true) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -93,7 +96,11 @@ int main()
 
         for (size_t i = 0; i < circle_list.size(); i++) {
             for (size_t j = 0; j < circle_list[i].edge.size(); j++) {
-                canvas[rounder(circle_list[i].edge[j][0] + circle_list[i].x)][rounder(circle_list[i].edge[j][1] + circle_list[i].y)] = 1;
+                int xpos = rounder(circle_list[i].edge[j][0] + circle_list[i].x);
+                int ypos = rounder(circle_list[i].edge[j][1] + circle_list[i].y);
+                if (xpos < 100 && ypos < 100) {
+                    canvas[xpos][ypos] = 1;
+                }
             }
         }
 
@@ -101,14 +108,18 @@ int main()
             for (size_t j = 0; j < circle_list.size(); j++) {
                 double x_distance = circle_list[i].x - circle_list[j].x;
                 double y_distance = circle_list[i].y - circle_list[j].y;
-                double distance = pow(x_distance,2) + pow(y_distance,2);
+                double distance = pow(x_distance, 2) + pow(y_distance, 2);
                 double sum_radius = pow(circle_list[i].r + circle_list[j].r, 2);
                 if ((j != i) && (sum_radius > distance)) {
-                    double angle_of_bounce = atan(y_distance/x_distance);
-                    circle_list[i].vx = cos(angle_of_bounce) * circle_list[i].velocity() * (circle_list[i].m/circle_list[i].m+circle_list[j].m);
-                    circle_list[i].vy = sin(angle_of_bounce) * circle_list[i].velocity() * (circle_list[i].m/circle_list[i].m+circle_list[j].m);
-                    circle_list[j].vx = cos(angle_of_bounce) * circle_list[i].velocity() * -1 * (circle_list[j].m/circle_list[i].m+circle_list[j].m);
-                    circle_list[j].vy = sin(angle_of_bounce) * circle_list[i].velocity() * -1 * (circle_list[j].m/circle_list[i].m+circle_list[j].m);
+                    double angle_of_bounce = atan(y_distance / x_distance);
+                    circle_list[i].x += cos(angle_of_bounce) * 0.5;
+                    circle_list[i].y += sin(angle_of_bounce) * 0.5;
+                    //circle_list[j].x -= cos(angle_of_bounce) * 0.5;
+                    //circle_list[j].y -= sin(angle_of_bounce) * 0.5;
+                    circle_list[i].vx = cos(angle_of_bounce) * circle_list[i].velocity() * (circle_list[i].m/(circle_list[i].m+circle_list[j].m));
+                    circle_list[i].vy = sin(angle_of_bounce) * circle_list[i].velocity() * (circle_list[i].m/(circle_list[i].m+circle_list[j].m));
+                    //circle_list[j].vx = cos(angle_of_bounce) * circle_list[i].velocity() * -1 * (circle_list[j].m/(circle_list[i].m+circle_list[j].m));
+                    //circle_list[j].vy = sin(angle_of_bounce) * circle_list[i].velocity() * -1 * (circle_list[j].m/(circle_list[i].m+circle_list[j].m));
                 }
             }
         }
