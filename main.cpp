@@ -76,14 +76,12 @@ int main()
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     std::vector<Circle> circle_list;
     Circle ball;
-    ball.set_values(5,53,100,1,300, true);
+    ball.set_values(5,47,100,1,300, false);
+    ball.vy = -5;
     circle_list.push_back(ball);
     Circle ball_1;
     ball_1.set_values(8,50,30,1,300, false);
     circle_list.push_back(ball_1);
-    Circle ball_2;
-    ball_2.set_values(8,80,30,1,300, false);
-    circle_list.push_back(ball_2);
     int canvas[100][100] = {0};
     while (true) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -98,20 +96,59 @@ int main()
             for (size_t j = 0; j < circle_list[i].edge.size(); j++) {
                 int xpos = rounder(circle_list[i].edge[j][0] + circle_list[i].x);
                 int ypos = rounder(circle_list[i].edge[j][1] + circle_list[i].y);
-                if (xpos < 100 && ypos < 100) {
+                if (xpos < 100 && ypos < 100 && xpos > 0 && ypos > 0) {
                     canvas[xpos][ypos] = 1;
                 }
             }
         }
-
+        //int lolcount;
         for (size_t i = 0; i < circle_list.size(); i++) {
             for (size_t j = 0; j < circle_list.size(); j++) {
-                double x_distance = circle_list[i].x - circle_list[j].x;
-                double y_distance = circle_list[i].y - circle_list[j].y;
+                double angle_of_bounce;
+                double distance_xy[2] = {0,0};
+                distance_xy[0] = circle_list[i].x - circle_list[j].x;
+                distance_xy[1] = circle_list[i].y - circle_list[j].y;
+                double sum_radius = pow(circle_list[i].r + circle_list[j].r, 2);
+                double distance = pow(distance_xy[0], 2) + pow(distance_xy[1], 2);
+                if ((j != i) && (sum_radius > distance)) {
+                    if (distance_xy[0] < 0) {
+                        angle_of_bounce = ((0.5 * M_PI) - atan(distance_xy[1] / distance_xy[0])) + (1.5 * M_PI);
+                        set_console_cursor(201, 3, hConsole);
+                        std::cout << angle_of_bounce;
+                        _sleep(4000);
+                    }
+                }
+                //double angle_of_bounce = atan(y_distance / x_distance);
+                //set_console_cursor(201, lolcount, hConsole);
+                //std::cout << "x: " << distance_xy[0];
+                //set_console_cursor(208, lolcount, hConsole);
+                //std::cout << "y: " << distance_xy[1];
+                //lolcount++;
+/*
+                double x_distance;
+                double y_distance;
+                bool direction_of_bounce = false;
+
+                if (circle_list[i].x > circle_list[j].x) {
+                    x_distance = circle_list[i].x - circle_list[j].x;
+                } else {
+                    x_distance = circle_list[j].x - circle_list[i].x;
+                    direction_of_bounce = true;
+                }
+
+                if (circle_list[i].y > circle_list[j].y) {
+                    y_distance = circle_list[i].y - circle_list[j].y;
+                } else {
+                    y_distance = circle_list[j].y - circle_list[i].y;
+                    direction_of_bounce = true;
+                }
                 double distance = pow(x_distance, 2) + pow(y_distance, 2);
                 double sum_radius = pow(circle_list[i].r + circle_list[j].r, 2);
                 if ((j != i) && (sum_radius > distance)) {
                     double angle_of_bounce = atan(y_distance / x_distance);
+                    if (direction_of_bounce) {
+                        angle_of_bounce = (M_PI) - angle_of_bounce;
+                    }
                     circle_list[i].x += cos(angle_of_bounce) * 0.5;
                     circle_list[i].y += sin(angle_of_bounce) * 0.5;
                     //circle_list[j].x -= cos(angle_of_bounce) * 0.5;
@@ -121,6 +158,7 @@ int main()
                     //circle_list[j].vx = cos(angle_of_bounce) * circle_list[i].velocity() * -1 * (circle_list[j].m/(circle_list[i].m+circle_list[j].m));
                     //circle_list[j].vy = sin(angle_of_bounce) * circle_list[i].velocity() * -1 * (circle_list[j].m/(circle_list[i].m+circle_list[j].m));
                 }
+                */
             }
         }
 
@@ -129,7 +167,6 @@ int main()
         auto stop = std::chrono::high_resolution_clock::now();
         auto delta_time = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
         total_time += delta_time.count();
-
         for (size_t i = 0; i < circle_list.size(); i++) {
             if (circle_list[i].enable_gravity == true) {
                 circle_list[i].vy -= 9.8 * delta_time.count() / 1000000;
@@ -139,6 +176,7 @@ int main()
 
         set_console_cursor(0, 0, hConsole);
         std::cout << total_time << "      ";
+
     }
     return 0;
 }
