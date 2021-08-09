@@ -12,6 +12,16 @@ int rounder(float d)
   return floor(d + 0.5);
 }
 
+class Manifold {
+    public:
+        double angle, primary_circle, secondary_circle, v1, v2;
+        std::vector<double> Resultant_vector_primary();
+};
+
+std::vector<double> Manifold::Resultant_vector_primary() {
+
+}
+
 class Circle {
     public:
         //radius, x-coordinate, y-coordinate, x-velocity (m/s), y-velocity (m/s), mass (kg), coefficient of friction (mu), perimeter (m)
@@ -149,8 +159,10 @@ int main()
                     circle_list[j].collision_cooldown = 10;
                     circle_list[i].collision = true;
                     circle_list[j].collision = true;
-                    circle_list[i].instantaneous_collision_velocity =  sqrt(pow(circle_list[j].vx, 2) + pow(circle_list[j].vy, 2)) + sqrt(pow(circle_list[i].vx, 2) + pow(circle_list[i].vy, 2)) * .45;
-                    circle_list[j].instantaneous_collision_velocity =  sqrt(pow(circle_list[j].vx, 2) + pow(circle_list[j].vy, 2)) + sqrt(pow(circle_list[i].vx, 2) + pow(circle_list[i].vy, 2)) * .45;
+                    //circle_list[i].instantaneous_displacement = sum_radius - distance;
+                    //circle_list[j].instantaneous_displacement = sum_radius - distance;
+                    circle_list[i].instantaneous_collision_velocity =  sqrt(pow(circle_list[j].vx, 2) + pow(circle_list[j].vy, 2)) + sqrt(pow(circle_list[i].vx, 2) + pow(circle_list[i].vy, 2)) * .5;
+                    circle_list[j].instantaneous_collision_velocity =  sqrt(pow(circle_list[j].vx, 2) + pow(circle_list[j].vy, 2)) + sqrt(pow(circle_list[i].vx, 2) + pow(circle_list[i].vy, 2)) * .5;
                     double collision_angle = get_collision_angle_radians(sum_radius, distance_xy);
                     circle_list[i].instantaneous_collision_angle = collision_angle;
                     if (collision_angle > 1) {
@@ -172,8 +184,8 @@ int main()
                 circle_list[i].vy -= 9.8 * delta_time.count() / 1000000;
             }
             if (circle_list[i]._static == false && circle_list[i].collision == true) {
-                //circle_list[i].x += cos(circle_list[i].instantaneous_displacement)+ 0.4;
-                //circle_list[i].y += sin(circle_list[i].instantaneous_displacement) + 0.4 ;
+                circle_list[i].x += cos(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_displacement;
+                circle_list[i].y += sin(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_displacement;
                 circle_list[i].vx = cos(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_collision_velocity;
                 circle_list[i].vy = sin(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_collision_velocity;
                 circle_list[i].collision = false;
