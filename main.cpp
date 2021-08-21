@@ -12,15 +12,7 @@ int rounder(float d)
   return floor(d + 0.5);
 }
 
-class Manifold {
-    public:
-        double angle, primary_circle, secondary_circle, v1, v2;
-        std::vector<double> Resultant_vector_primary();
-};
 
-std::vector<double> Manifold::Resultant_vector_primary() {
-
-}
 
 class Circle {
     public:
@@ -31,12 +23,28 @@ class Circle {
         double instantaneous_collision_angle, instantaneous_collision_velocity, instantaneous_displacement;
         bool enable_gravity, _static;
         bool collision = false;
-        int collision_cooldown = 0;
+        //int collision_cooldown = 0;
         void set_values(double, double, double, double, int, bool, bool);
         std::vector<std::vector<float>> edge;
         void calculate_new_position(double, double);
         double velocity();
+        std::vector<double> velocityXY();
 };
+
+
+class Manifold {
+    public:
+        double normal, depth;
+        std::vector<Circle> collision_objects;
+        std::vector<std::vector<double>> velocity;
+        std::vector<double> collision_pos;
+};
+
+
+
+std::vector<double> Circle::velocityXY() {
+    return {vx, vy};
+}
 
 double Circle::velocity() {
     return sqrt(pow(vx, 2) + pow(vy, 2));
@@ -83,6 +91,7 @@ void set_console_cursor(int x, int y, HANDLE console) {
     SetConsoleCursorPosition(console, ccoord);
 }
 
+/*
 double get_collision_angle_radians(double sum_radius, double distance_xy[2]) {
     double angle_of_bounce;
     double distance = pow(distance_xy[0], 2) + pow(distance_xy[1], 2);
@@ -102,6 +111,7 @@ double get_collision_angle_radians(double sum_radius, double distance_xy[2]) {
     }
     return angle_of_bounce;
 }
+*/
 
 int main()
 {
@@ -154,22 +164,27 @@ int main()
                 distance_xy[1] = circle_list[i].y - circle_list[j].y;
                 double sum_radius = pow(circle_list[i].r + circle_list[j].r, 2);
                 double distance = pow(distance_xy[0], 2) + pow(distance_xy[1], 2);
-                if ((j != i) && (sum_radius > distance) && collision == false && circle_list[i].collision_cooldown < 1) {
-                    circle_list[i].collision_cooldown = 10;
-                    circle_list[j].collision_cooldown = 10;
-                    circle_list[i].collision = true;
-                    circle_list[j].collision = true;
+                //create a manifold with each object
+                if ((j != i) && (sum_radius > distance) && collision == false) {
+                    Manifold collision_event;
+                    collision_event.collision_objects = {circle_list[i], circle_list[j]};
+                    collision_event.velocity = {circle_list[i].velocityXY(), circle_list[j].velocityXY()};
+                    collision_event.depth = (sum_radius - distance) * 0.5;
+                    //circle_list[i].collision_cooldown = 10;
+                    //circle_list[j].collision_cooldown = 10;
+                    //circle_list[i].collision = true;
+                    //circle_list[j].collision = true;
                     //circle_list[i].instantaneous_displacement = sum_radius - distance;
                     //circle_list[j].instantaneous_displacement = sum_radius - distance;
-                    circle_list[i].instantaneous_collision_velocity =  sqrt(pow(circle_list[j].vx, 2) + pow(circle_list[j].vy, 2)) + sqrt(pow(circle_list[i].vx, 2) + pow(circle_list[i].vy, 2)) * .5;
-                    circle_list[j].instantaneous_collision_velocity =  sqrt(pow(circle_list[j].vx, 2) + pow(circle_list[j].vy, 2)) + sqrt(pow(circle_list[i].vx, 2) + pow(circle_list[i].vy, 2)) * .5;
-                    double collision_angle = get_collision_angle_radians(sum_radius, distance_xy);
-                    circle_list[i].instantaneous_collision_angle = collision_angle;
-                    if (collision_angle > 1) {
-                        circle_list[j].instantaneous_collision_angle = collision_angle - (M_PI);
-                    } else {
-                        circle_list[j].instantaneous_collision_angle = collision_angle + (M_PI);
-                    }
+                    //circle_list[i].instantaneous_collision_velocity =  sqrt(pow(circle_list[j].vx, 2) + pow(circle_list[j].vy, 2)) + sqrt(pow(circle_list[i].vx, 2) + pow(circle_list[i].vy, 2)) * .5;
+                    //circle_list[j].instantaneous_collision_velocity =  sqrt(pow(circle_list[j].vx, 2) + pow(circle_list[j].vy, 2)) + sqrt(pow(circle_list[i].vx, 2) + pow(circle_list[i].vy, 2)) * .5;
+                    //double collision_angle = get_collision_angle_radians(sum_radius, distance_xy);
+                    //circle_list[i].instantaneous_collision_angle = collision_angle;
+                    //if (collision_angle > 1) {
+                    //    circle_list[j].instantaneous_collision_angle = collision_angle - (M_PI);
+                    //} else {
+                    //    circle_list[j].instantaneous_collision_angle = collision_angle + (M_PI);
+                    //}
                 }
             }
         }
@@ -184,14 +199,13 @@ int main()
                 circle_list[i].vy -= 9.8 * delta_time.count() / 1000000;
             }
             if (circle_list[i]._static == false && circle_list[i].collision == true) {
-                circle_list[i].x += cos(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_displacement;
-                circle_list[i].y += sin(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_displacement;
-                circle_list[i].vx = cos(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_collision_velocity;
-                circle_list[i].vy = sin(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_collision_velocity;
-                circle_list[i].collision = false;
+                //circle_list[i].x += cos(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_displacement;
+                //circle_list[i].y += sin(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_displacement;
+                //circle_list[i].vx = cos(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_collision_velocity;
+                //circle_list[i].vy = sin(circle_list[i].instantaneous_collision_angle) * circle_list[i].instantaneous_collision_velocity;
+                //circle_list[i].collision = false;
             }
             circle_list[i].calculate_new_position(delta_time.count(), pixels_per_metre);
-            circle_list[i].collision_cooldown--;
         }
 
         set_console_cursor(0, 0, hConsole);
