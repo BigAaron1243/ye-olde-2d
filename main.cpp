@@ -34,10 +34,10 @@ class Circle {
 
 class Manifold {
     public:
-        double normal, depth;
+        double depth;
         std::vector<Circle> collision_objects;
         std::vector<std::vector<double>> velocity;
-        std::vector<double> collision_pos;
+        std::vector<double> collision_pos, normal;
 };
 
 
@@ -119,10 +119,7 @@ int main()
     int total_time;
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     std::vector<Circle> circle_list;
-    Circle ball_3;
-    ball_3.set_values(5,60,5,1,300, false, false);
-    ball_3.vy = 5;
-    circle_list.push_back(ball_3);
+
     Circle ball;
     ball.set_values(5,0,100,1,300, true, false);
     ball.vx = 5;
@@ -170,6 +167,10 @@ int main()
                     collision_event.collision_objects = {circle_list[i], circle_list[j]};
                     collision_event.velocity = {circle_list[i].velocityXY(), circle_list[j].velocityXY()};
                     collision_event.depth = (sum_radius - distance) * 0.5;
+                    collision_event.normal = {distance_xy[0] / sqrt(pow(distance_xy[0], 2) + pow(distance_xy[1], 2)), distance_xy[1] / sqrt(pow(distance_xy[0], 2) + pow(distance_xy[1], 2))};
+                    set_console_cursor(circle_list[i].x, circle_list[i].y, hConsole);
+                    std::cout << collision_event.normal[0] << ", " << collision_event.normal[0];
+                    _sleep(100);
                     //circle_list[i].collision_cooldown = 10;
                     //circle_list[j].collision_cooldown = 10;
                     //circle_list[i].collision = true;
