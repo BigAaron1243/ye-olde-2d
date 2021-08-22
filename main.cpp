@@ -35,6 +35,8 @@ class Circle {
 class Manifold {
     public:
         double depth;
+        Circle *primary_object;
+        Circle *secondary_object;
         std::vector<Circle> collision_objects;
         std::vector<std::vector<double>> velocity;
         std::vector<double> collision_pos, normal;
@@ -125,7 +127,7 @@ int main()
     ball.vx = 5;
     circle_list.push_back(ball);
     Circle ball_2;
-    ball_2.set_values(5,100,120,1,300, true, false);
+    ball_2.set_values(5,100,100,1,300, true, false);
     ball_2.vx = -5;
     circle_list.push_back(ball_2);
 
@@ -153,6 +155,7 @@ int main()
         }
         //int lolcount;
         bool collision = false;
+        std::vector<Manifold> collision_list;
         for (size_t i = 0; i < circle_list.size(); i++) {
             for (size_t j = 0; j < circle_list.size(); j++) {
                 double angle_of_bounce = 0;
@@ -164,13 +167,16 @@ int main()
                 //create a manifold with each object
                 if ((j != i) && (sum_radius > distance) && collision == false) {
                     Manifold collision_event;
-                    collision_event.collision_objects = {circle_list[i], circle_list[j]};
+                    //collision_event.collision_objects = {circle_list[i], circle_list[j]};
+                    collision_event.primary_object = &circle_list[i];
+                    collision_event.secondary_object = &circle_list[j];
                     collision_event.velocity = {circle_list[i].velocityXY(), circle_list[j].velocityXY()};
                     collision_event.depth = (sum_radius - distance) * 0.5;
                     collision_event.normal = {distance_xy[0] / sqrt(pow(distance_xy[0], 2) + pow(distance_xy[1], 2)), distance_xy[1] / sqrt(pow(distance_xy[0], 2) + pow(distance_xy[1], 2))};
-                    set_console_cursor(circle_list[i].x, circle_list[i].y, hConsole);
+                    set_console_cursor(circle_list[i].x + 10, 100 - circle_list[i].y, hConsole);
                     std::cout << collision_event.normal[0] << ", " << collision_event.normal[0];
-                    _sleep(100);
+                    collision_list.push_back(collision_event);
+                    collision = true;
                     //circle_list[i].collision_cooldown = 10;
                     //circle_list[j].collision_cooldown = 10;
                     //circle_list[i].collision = true;
@@ -195,6 +201,15 @@ int main()
         auto stop = std::chrono::high_resolution_clock::now();
         auto delta_time = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
         total_time += delta_time.count();
+
+        std::cout << collision_list.size();
+        for (size_t i = 0; i < collision_list.size(); i++) {
+            collision_list[i].primary_object->x = 10;//collision_list[i].collision_objects[j].vx * collision_list[i].normal[0];
+            collision_list[i].primary_object->y = 10;//collision_list[i].collision_objects[j].vx * collision_list[i].normal[0];
+            collision_list[i].secondary_object->x = 10;//collision_list[i].collision_objects[j].vy * collision_list[i].normal[1];
+            collision_list[i].secondary_object->y = 10;//collision_list[i].collision_objects[j].vy * collision_list[i].normal[1];
+        }
+
         for (size_t i = 0; i < circle_list.size(); i++) {
             if (circle_list[i].enable_gravity == true) {
                 circle_list[i].vy -= 9.8 * delta_time.count() / 1000000;
